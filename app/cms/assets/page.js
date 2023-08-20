@@ -1,10 +1,13 @@
 import Cms from '@/components/Cms'
+import Panel from '@/components/Panel'
 import React from 'react'
 
 function Assets() {
   return (
     <Cms title="Assets">
-    <div>Assets</div>
+      <Panel>
+        Assets
+      </Panel>
     </Cms>
   )
 }

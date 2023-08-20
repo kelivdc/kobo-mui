@@ -8,11 +8,11 @@ export default function Cms({children, title}) {
     <Paper
         sx={{
           width: "100%",
-          height: "100vh",
+          minHeight: "100vh",
           backgroundImage: 'url("/dunes.jpeg")',
-          backgroundRepeat: "no-repeat",
-          backgroundSize: "cover",
-          margin: "0"
+          backgroundRepeat: "repeat",
+          margin: "0",
+          position: 'relative'
         }}
       >
       <Sidebar title={title}>
