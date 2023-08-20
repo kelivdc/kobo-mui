@@ -20,7 +20,13 @@ import ListItemText from "@mui/material/ListItemText";
 import InboxIcon from "@mui/icons-material/MoveToInbox";
 import MailIcon from "@mui/icons-material/Mail";
 import { Button, Chip, Menu, MenuItem } from "@mui/material";
-import { AccountCircle, Article, Dashboard } from "@mui/icons-material";
+import {
+  AccountCircle,
+  Article,
+  Dashboard,
+  Logout,
+  LogoutOutlined,
+} from "@mui/icons-material";
 import { signOut } from "next-auth/react";
 import Link from "next/link";
 
@@ -135,9 +141,13 @@ export default function MiniDrawer({ children, title }) {
             <ChevronRightIcon />
           </IconButton>
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            <Chip label={title} variant="outlined" sx={{
-              backgroundColor: "#fff"
-            }} />
+            <Chip
+              label={title}
+              variant="outlined"
+              sx={{
+                backgroundColor: "#fff",
+              }}
+            />
           </Typography>
           <div>
             <IconButton
@@ -193,7 +203,12 @@ export default function MiniDrawer({ children, title }) {
               transformOrigin={{ horizontal: "right", vertical: "top" }}
               anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
             >
-              <MenuItem onClick={() => signOut()}>Logout</MenuItem>
+              <MenuItem onClick={() => signOut()}>
+                <ListItemIcon>
+                  <Logout fontSize="small" />
+                </ListItemIcon>
+                <ListItemText>Logout</ListItemText>
+              </MenuItem>
             </Menu>
           </div>
         </Toolbar>
