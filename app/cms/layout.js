@@ -1,13 +1,12 @@
-import Sidebar from "@/components/Sidebar";
-import { Box, Paper, Typography } from "@mui/material"
+import { NextAuthProvider } from "@/components/Provider";
 
 export const metadata = {
-  title: 'CMS'
-}
+  title: "CMS",
+};
 export default function DashboardLayout({ children }) {
   return (
     <>
-    {children}    
+      <NextAuthProvider>{children}</NextAuthProvider>
     </>
   );
 }

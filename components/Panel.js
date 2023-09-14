@@ -1,17 +1,19 @@
-import { Box } from "@mui/material";
+import { Box, Container } from "@mui/material";
 import React from "react";
 
 function Panel({ children }) {
   return (
     <>
-      <Box
+      <Container      
         sx={{
           border: "solid 1px #fff",
           backgroundColor: "white",
+          position: "relative",
+          overflowX: "auto"
         }}
       >
         {children}
-      </Box>
+      </Container>
     </>
   );
 }

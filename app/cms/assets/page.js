@@ -1,64 +1,85 @@
 "use client";
 import Cms from "@/components/Cms";
 import Panel from "@/components/Panel";
-import { Box, Tab, Tabs, Typography } from "@mui/material";
-import React, { useState } from "react";
+import { Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@mui/material";
+import { useSession } from "next-auth/react";
+import React, { useEffect, useState } from "react";
+import Paper from '@mui/material/Paper';
+import moment from "moment";
+import Link from "next/link";
 
-function a11yProps(index) {
-  return {
-    id: `vertical-tab-${index}`,
-    "aria-controls": `vertical-tabpanel-${index}`,
-  };
-}
-
-function TabPanel(props) {
-  const { children, value, index, ...other } = props;
-
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`vertical-tabpanel-${index}`}
-      aria-labelledby={`vertical-tab-${index}`}
-      {...other}
-    >
-      {value === index && (
-        <Box sx={{ p: 3 }}>
-          <Typography>{children}</Typography>
-        </Box>
-      )}
-    </div>
-  );
-}
+const api_url = process.env.server;
 
 function Assets() {
-  const [value, setValue] = useState(0);
-  const handleChange = (event, newValue) => {
-    setValue(newValue);
-  };
+  const { data: session } = useSession();
+  const [assets, setAssets] = useState([]);
+  useEffect(() => {
+    var arrResult = [];
+    if (session) {
+      async function getTotal(uid) {
+        try {
+          const resp = await fetch(api_url + "/assets/total/" + uid, {
+            headers: {
+              Authorization: `Bearer ${session.jwt}`,
+            },  
+          });
+          const data = await resp.json();
+          return data;
+        } catch {
+          return 0;
+        }
+      }
+
+      async function getAssets() {
+        const resp = await fetch(api_url + "/assets", {
+          headers: {
+            Authorization: `Bearer ${session.jwt}`,
+          },
+        });
+        const data = await resp.json();
+        let hasil = data["results"];
+        var arr = {};
+        hasil.forEach((item) => {
+          arr["result"] = item;
+          arr["local"] = getTotal(item["uid"]);
+          arrResult.push(arr);
+        });
+        setAssets(arrResult);
+      }
+      getAssets();
+    }
+  }, [session]);
   return (
     <Cms title="Assets">
       <Panel>
-        <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-          <Tabs value={value} onChange={handleChange}>
-            <Tab label="Table" {...a11yProps(0)} />
-            <Tab label="Reports" {...a11yProps(1)} />
-            <Tab label="Gallery" {...a11yProps(2)} />
-            <Tab label="Map" {...a11yProps(3)} />
-          </Tabs>
-        </Box>
-        <TabPanel value={value} index={0}>
-          Table
-        </TabPanel>
-        <TabPanel value={value} index={1}>
-          Reports
-        </TabPanel>
-        <TabPanel value={value} index={2}>
-          Gallery
-        </TabPanel>
-        <TabPanel value={value} index={3}>
-          Map
-        </TabPanel>
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>Name</TableCell>
+                <TableCell>Created At</TableCell>
+                <TableCell>Last Modified</TableCell>
+                <TableCell>Submissions</TableCell>
+                <TableCell>Local Subs.</TableCell>
+                <TableCell>Actions</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {assets.map((item, index) => (
+                <TableRow key={index}>
+                  <TableCell><Link underline="none" href={`/cms/assets/${item.result.uid}`}>{item.result.name}</Link></TableCell>
+                  <TableCell>{moment(item.result.date_created).format('LL')}</TableCell>
+                  <TableCell>{moment(item.result.date_modified).format('LL')}</TableCell>
+                  <TableCell>{item.result.deployment__submission_count}</TableCell>
+                  <TableCell id={`total_${item.result.uid}`}>{item.local}</TableCell>
+                  <TableCell>
+                    <Button variant="contained" id={`btn_${item.result.uid}`} className="rounded-full" onClick={() => selectUid(item.result.uid)}>Pull</Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
       </Panel>
     </Cms>
   );

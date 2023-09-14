@@ -23,6 +23,7 @@ export default function MuiLayout({ children }) {
           backgroundImage: 'url("/dunes.jpeg")',
           backgroundRepeat: "no-repeat",
           backgroundSize: "cover",
+          backgroundPosition: "center",
           margin: "0"
         }}
       >
