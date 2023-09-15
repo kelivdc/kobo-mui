@@ -25,7 +25,6 @@ function AssetsDetail({params}) {
       <Panel>
         <Box sx={{ width: "100%", typography: "body1" }}>
           <TabContext value={value}>
-            <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
               <TabList
                 onChange={handleChange}
                 aria-label="lab API tabs example"
@@ -35,8 +34,9 @@ function AssetsDetail({params}) {
                 <Tab label="Gallery" value="gallery" />
                 <Tab label="Map" value="map" />
               </TabList>
-            </Box>
-            <TabPanel value="assets">
+            <TabPanel value="assets" sx={{
+              padding: "10px"
+            }}>
               <AssetTable params={params} />
             </TabPanel>
             <TabPanel value="reports">Reports</TabPanel>

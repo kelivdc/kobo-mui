@@ -1,19 +1,21 @@
-import { Box, Container } from "@mui/material";
+import { Box, Container, Paper } from "@mui/material";
 import React from "react";
 
 function Panel({ children }) {
+  const windowWidth = window.innerWidth - 290;
   return (
     <>
-      <Container      
+      <Box                  
         sx={{
           border: "solid 1px #fff",
           backgroundColor: "white",
           position: "relative",
-          overflowX: "auto"
+          overflowX: "auto",
+          maxWidth: `${windowWidth}px`
         }}
       >
         {children}
-      </Container>
+      </Box>
     </>
   );
 }
