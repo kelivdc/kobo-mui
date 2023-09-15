@@ -1,8 +1,12 @@
 import { Box, Container, Paper } from "@mui/material";
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 function Panel({ children }) {
-  const windowWidth = window.innerWidth - 290;
+  const [maxWidth, setMaxWidth] = useState(null)
+  useEffect(() => {
+    setMaxWidth(window.innerWidth - 290)
+  },[])
+  
   return (
     <>
       <Box                  
@@ -11,7 +15,7 @@ function Panel({ children }) {
           backgroundColor: "white",
           position: "relative",
           overflowX: "auto",
-          maxWidth: `${windowWidth}px`
+          maxWidth: `${maxWidth}px`
         }}
       >
         {children}

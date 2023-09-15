@@ -42,7 +42,7 @@ function AssetTable({ params }) {
       setSurvey(data["Content"]["survey"]);
       const values = data["Content"]["survey"].map((item) => ({
         name: item["label"][0],
-        selector: item["name"],
+        selector: item["name"],        
         sortable: true,
       }));
       setKeys(values);
@@ -50,6 +50,7 @@ function AssetTable({ params }) {
       const col_head = data["Content"]["survey"].map((item) => ({
         field: item["name"],
         headerName: item["label"][0],
+        width: 170,
         valueFormatter: columnFormat,
       }));
       setColumns(col_head);
@@ -73,6 +74,7 @@ function AssetTable({ params }) {
         "&pageSize=" +
         paginationModel["pageSize"];
       const resp = await fetch(url, {
+        method: "POST",
         headers: {
           Authorization: `Bearer ${session.jwt}`,
         },
