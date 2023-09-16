@@ -3,6 +3,7 @@ import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import moment from "moment";
 import { useSession } from "next-auth/react";
 import React, { useEffect, useState } from "react";
+import { z } from "zod";
 
 const api_url = process.env.server;
 // const api_url = 'https://eobj0ddwkt1wat0.m.pipedream.net';
@@ -58,8 +59,22 @@ function AssetTable({ params }) {
       }));
       setKeys(values);
       setChoices(data["Content"]["choices"]);
+
       const col_head = data["Content"]["survey"].map((item) => {
+        function choice_value(params) {
+          try {
+            var hasil = data["Content"]["choices"].filter(function (z) {
+              if (('q'+ z.list_name == params.field)&&(z.name == params.value)) {                
+                return z.label[0]
+              }
+            })
+          return hasil[0].label[0];         
+          } catch {
+            return ''
+          }           
+        }
         if (item["type"] == "start" || item["type"] == "end") {
+          // Format Date
           return {
             field: item["name"],
             headerName: item["label"][0],
@@ -67,20 +82,43 @@ function AssetTable({ params }) {
             valueGetter: ({ value }) => value && moment(value).format("lll"),
           };
         } else if (item["type"] == "select_one") {
-          let value_list = data["Content"]["choices"].filter(function(data) {
-            if ('q' + data.list_name == item["name"]) {
+          // Dropdown filter
+          let value_list = data["Content"]["choices"].filter(function (data) {
+            if ("q" + data.list_name == item["name"]) {
               return {
                 value: data.name,
-                label: data.label[0]              
-              }
-            }            
+                label: data.label[0],
+              };
+            }
           });
+          //   {
+          //     "$autovalue": "65",
+          //     "$kuid": "v8Ow6Gt4N",
+          //     "label": [
+          //         "MEKARWANGI"
+          //     ],
+          //     "list_name": "des",
+          //     "myfilter": "6",
+          //     "name": "65"
+          // }
           return {
             field: item["name"],
             headerName: item["label"][0],
             width: 170,
             type: "singleSelect",
             valueOptions: value_list.sort(),
+            valueFormatter: (params) => {
+              return choice_value(params);
+            },
+            // let label = value_list.filter((z) => {
+            //   if (('q' + z.list_name == item["name"]) && (params.value == z.name)) {
+            //     return 'BENAR'
+            //   } else {
+            //     return 'zz'
+            //   }
+            //   // return z.list
+            //   // return 'q' + z.name === item["name"] && z.params.value
+            // })
           };
         } else {
           return {
@@ -184,6 +222,9 @@ function AssetTable({ params }) {
         filterDebounceMs={300}
         loading={isLoading}
         slots={{ toolbar: GridToolbar }}
+        columnVisibilityModel={{
+          judul: false,
+        }}
         sx={{
           "& .MuiDataGrid-columnHeaders": {
             bgcolor: "#f0f0f0",
