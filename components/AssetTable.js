@@ -5,11 +5,12 @@ import { useSession } from "next-auth/react";
 import React, { useEffect, useState } from "react";
 
 const api_url = process.env.server;
+// const api_url = 'https://eobj0ddwkt1wat0.m.pipedream.net';
 
 function columnFormat(values) {
   let value = values["value"];
   if (moment(value, moment.ISO_8601).isValid()) {
-    return moment(value).format('lll');
+    return moment(value).format("lll");
   } else {
     return values["value"];
   }
@@ -21,10 +22,20 @@ function AssetTable({ params }) {
   const [keys, setKeys] = useState([]);
   const [choices, setChoices] = useState([]);
   const [columns, setColumns] = useState([]);
+  const [colHeader, setColHeader] = useState([]);
   const [rows, setRows] = useState([]);
   const [totalRows, setTotalRows] = useState(0);
-  const [pageSize, setPageSize] = useState(10);
-  const [filterData, setFilderData] = useState([]);
+  const [pageSize, setPageSize] = useState(30);
+  const [sortField, setSortField] = useState({
+    Field: "",
+    Sort: "",
+  });
+  const [filterData, setFilterData] = useState({
+    Filter: "",
+    Value: "",
+    SortField: "",
+    SortDirection: "",
+  });
   const [paginationModel, setPaginationModel] = React.useState({
     page: 0,
     pageSize: pageSize,
@@ -42,17 +53,43 @@ function AssetTable({ params }) {
       setSurvey(data["Content"]["survey"]);
       const values = data["Content"]["survey"].map((item) => ({
         name: item["label"][0],
-        selector: item["name"],        
+        selector: item["name"],
         sortable: true,
       }));
       setKeys(values);
       setChoices(data["Content"]["choices"]);
-      const col_head = data["Content"]["survey"].map((item) => ({
-        field: item["name"],
-        headerName: item["label"][0],
-        width: 170,
-        valueFormatter: columnFormat,
-      }));
+      const col_head = data["Content"]["survey"].map((item) => {
+        if (item["type"] == "start" || item["type"] == "end") {
+          return {
+            field: item["name"],
+            headerName: item["label"][0],
+            width: 170,
+            valueGetter: ({ value }) => value && moment(value).format("lll"),
+          };
+        } else if (item["type"] == "select_one") {
+          let value_list = data["Content"]["choices"].filter(function(data) {
+            if ('q' + data.list_name == item["name"]) {
+              return {
+                value: data.name,
+                label: data.label[0]              
+              }
+            }            
+          });
+          return {
+            field: item["name"],
+            headerName: item["label"][0],
+            width: 170,
+            type: "singleSelect",
+            valueOptions: value_list.sort(),
+          };
+        } else {
+          return {
+            field: item["name"],
+            headerName: item["label"][0],
+            width: 170,
+          };
+        }
+      });
       setColumns(col_head);
     } catch (err) {
       console.log("Error", err);
@@ -60,9 +97,6 @@ function AssetTable({ params }) {
   }
 
   async function getData() {
-    const requestBody = JSON.stringify({
-      filterData,
-    });
     try {
       setIsLoading(true);
       let url =
@@ -73,14 +107,22 @@ function AssetTable({ params }) {
         paginationModel["page"] +
         "&pageSize=" +
         paginationModel["pageSize"];
+
       const resp = await fetch(url, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${session.jwt}`,
+          "Content-Type": "application/json",
         },
+        body: JSON.stringify(filterData),
       });
+
       const data = await resp.json();
-      setRows(data["data"]);
+      if (data["data"] != null) {
+        setRows(data["data"]);
+      } else {
+        setRows([]);
+      }
       setTotalRows(data["recordsTotal"]);
       setIsLoading(false);
     } catch (err) {
@@ -90,24 +132,30 @@ function AssetTable({ params }) {
   }
   const getCustomId = (row) => row["_id"];
   useEffect(() => {
-    var arrResult = [];
     if (session) {
       getSurvey();
       getData();
     }
-  }, [session]);
-
-  useEffect(() => {
-    getData();
-  }, [paginationModel]);
+  }, [paginationModel, filterData, session]);
 
   const handleSort = (values) => {
-    console.log("Sort", values);
+    if (session) {
+      setFilterData((prevState) => ({
+        ...prevState,
+        SortField: values[0]["field"],
+        SortDirection: values[0]["sort"],
+      }));
+    }
   };
 
   const handleFilter = (values) => {
-    setFilderData(values);
-    console.log("Filter", values);
+    if (session) {
+      setFilterData((prevState) => ({
+        ...prevState,
+        Filter: values["items"][0]["field"],
+        Value: values["items"][0]["value"],
+      }));
+    }
   };
 
   return (
@@ -115,7 +163,7 @@ function AssetTable({ params }) {
       <DataGrid
         initialState={{
           pagination: {
-            paginationModel: { pageSize: 10, page: 0 },
+            paginationModel: { pageSize: 30, page: 0 },
           },
         }}
         sortingOrder={["desc", "asc"]}
@@ -123,15 +171,17 @@ function AssetTable({ params }) {
         rows={rows}
         getRowId={getCustomId}
         rowCount={totalRows}
-        pageSizeOptions={[10, 30, 50, 100]}
+        pageSizeOptions={[30, 50, 100]}
         paginationModel={paginationModel}
         paginationMode="server"
         onPaginationModelChange={setPaginationModel}
+        sortingMode="server"
         onSortModelChange={handleSort}
-        rowHeight={25}        
+        rowHeight={25}
         columnHeaderHeight={35}
         filterMode="server"
         onFilterModelChange={handleFilter}
+        filterDebounceMs={300}
         loading={isLoading}
         slots={{ toolbar: GridToolbar }}
         sx={{

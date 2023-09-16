@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 function Panel({ children }) {
   const [maxWidth, setMaxWidth] = useState(null)
   useEffect(() => {
-    setMaxWidth(window.innerWidth - 290)
+    setMaxWidth(window.innerWidth - 300)
   },[])
   
   return (
