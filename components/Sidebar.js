@@ -27,7 +27,7 @@ import {
   Logout,
   LogoutOutlined,
 } from "@mui/icons-material";
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 
 const drawerWidth = 240;
@@ -98,6 +98,7 @@ const Drawer = styled(MuiDrawer, {
 }));
 
 export default function MiniDrawer({ children, title }) {
+  const { data: session } = useSession();
   const theme = useTheme();
   const [open, setOpen] = React.useState(true);
 
@@ -151,14 +152,15 @@ export default function MiniDrawer({ children, title }) {
           </Typography>
           <div>
             <IconButton
-              size="large"
+              size="small"
               aria-label="account of current user"
               aria-controls="menu-appbar"
               aria-haspopup="true"
               onClick={handleMenu}
               color="inherit"
             >
-              <AccountCircle />
+              <Typography fontSize="14px">{session?.username}
+              </Typography>
             </IconButton>
             <Menu
               id="menu-appbar"
@@ -205,7 +207,7 @@ export default function MiniDrawer({ children, title }) {
             >
               <MenuItem onClick={() => signOut()}>
                 <ListItemIcon>
-                  <Logout fontSize="small" />
+                  <Logout fontSize="small" /> 
                 </ListItemIcon>
                 <ListItemText>Logout</ListItemText>
               </MenuItem>

@@ -6,7 +6,10 @@ const env = {
   const nextConfig = {
     reactStrictMode: true,
     swcMinify: true,
-    env: env
+    env: env,
+    images: {
+      domains: ['kf.data.sahabatgolkar.com'],
+    },
   }
 
 module.exports = nextConfig

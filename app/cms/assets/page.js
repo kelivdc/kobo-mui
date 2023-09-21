@@ -13,6 +13,25 @@ const api_url = process.env.server;
 function Assets() {
   const { data: session } = useSession();
   const [assets, setAssets] = useState([]);
+  const [uid, setUid] = useState(true);
+  const selectUid = (uid) => {
+    setUid(uid);
+    document.getElementById(`btn_${uid}`).innerHTML = 'Pulling...';
+    document.getElementById(`btn_${uid}`).disabled = true;
+    document.getElementById(`total_${uid}`).innerHTML = '-';
+    pullData(uid)
+  }
+  const pullData = async (uid) => {
+    const resp = await fetch(process.env.server + `/assets/pull/${uid}`, {
+      headers: {
+        Authorization: `Bearer ${session?.jwt}`
+      }
+    })
+    const data = await resp.json()
+    document.getElementById(`total_${data['uid']}`).innerHTML = data['total']
+    document.getElementById(`btn_${data['uid']}`).disabled = false;
+    document.getElementById(`btn_${data['uid']}`).innerHTML = 'Pull';
+  }
   useEffect(() => {
     var arrResult = [];
     if (session) {

@@ -21,7 +21,7 @@ export const authOptions = {
                     }
                 })
                 .then(function (result) {                    
-                    const user = {id: "1", name: "Admin", email: "admin@gmail.com", jwt: result.data.token}
+                    const user = {id: "1", username: credentials.username, jwt: result.data.token}
                     return user
                 })
                 .catch(function (error) {
@@ -41,13 +41,16 @@ export const authOptions = {
     },   
     callbacks: {        
         async session({ session, token}) {            
+            session.username = token.username
             session.id = token.id
             session.jwt = token.jwt
             return Promise.resolve(session)
         },
-        async jwt({ token, user}) {            
+        async jwt({ token, user}) {         
           if (user) {
-            token.id = user.id
+            // Add info to session encrypted 
+            token.username = user.username
+            // token.id = user.id
             token.jwt = user.jwt
           }            
           return Promise.resolve(token)

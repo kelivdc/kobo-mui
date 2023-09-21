@@ -1,9 +1,11 @@
-import { Table, TableCell, TableHead, TableRow } from "@mui/material";
+import { Dialog, DialogContent, DialogTitle, IconButton, Table, TableCell, TableHead, TableRow } from "@mui/material";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import moment from "moment";
 import { useSession } from "next-auth/react";
 import React, { useEffect, useState } from "react";
-import { z } from "zod";
+// import { z } from "zod";
+import ImageIcon from '@mui/icons-material/Image';
+import Image from "next/image";
 
 const api_url = process.env.server;
 // const api_url = 'https://eobj0ddwkt1wat0.m.pipedream.net';
@@ -42,6 +44,17 @@ function AssetTable({ params }) {
     pageSize: pageSize,
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [imageUrl, setImageUrl] = useState('')
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  const handleClickOpen = (image_url) => {
+    setImageUrl(image_url)
+    setOpen(true);
+  };
 
   async function getSurvey() {
     try {
@@ -72,7 +85,8 @@ function AssetTable({ params }) {
           } catch {
             return ''
           }           
-        }
+        }        
+        
         if (item["type"] == "start" || item["type"] == "end") {
           // Format Date
           return {
@@ -81,6 +95,18 @@ function AssetTable({ params }) {
             width: 170,
             valueGetter: ({ value }) => value && moment(value).format("lll"),
           };
+        } else if (item["type"] == "image") {
+          return {
+            field: item["name"],
+            headerName: item["label"][0],
+            width: 170,
+            renderCell: (params) => {
+              // download_small_url
+              // console.log(params.row["_attachments"][0])
+              return <a href={params.row["_attachments"][0]["download_small_url"]} target="_blank"><ImageIcon /></a>
+              // return <IconButton color="primary" aria-label="delete" onClick={handleClickOpen(params.row["_attachments"][0]["download_small_url"])}><ImageIcon /></IconButton>
+            }
+          } 
         } else if (item["type"] == "select_one") {
           // Dropdown filter
           let value_list = data["Content"]["choices"].filter(function (data) {
@@ -90,17 +116,7 @@ function AssetTable({ params }) {
                 label: data.label[0],
               };
             }
-          });
-          //   {
-          //     "$autovalue": "65",
-          //     "$kuid": "v8Ow6Gt4N",
-          //     "label": [
-          //         "MEKARWANGI"
-          //     ],
-          //     "list_name": "des",
-          //     "myfilter": "6",
-          //     "name": "65"
-          // }
+          });         
           return {
             field: item["name"],
             headerName: item["label"][0],
@@ -109,16 +125,7 @@ function AssetTable({ params }) {
             valueOptions: value_list.sort(),
             valueFormatter: (params) => {
               return choice_value(params);
-            },
-            // let label = value_list.filter((z) => {
-            //   if (('q' + z.list_name == item["name"]) && (params.value == z.name)) {
-            //     return 'BENAR'
-            //   } else {
-            //     return 'zz'
-            //   }
-            //   // return z.list
-            //   // return 'q' + z.name === item["name"] && z.params.value
-            // })
+            },            
           };
         } else {
           return {
@@ -198,6 +205,11 @@ function AssetTable({ params }) {
 
   return (
     <>
+    <Dialog onClose={handleClose} open={open}>
+        <DialogContent>          
+          {/* <Image src={imageUrl} alt="Preview" width={500} height={500} /> */}
+        </DialogContent>
+    </Dialog>
       <DataGrid
         initialState={{
           pagination: {
