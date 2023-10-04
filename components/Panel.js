@@ -15,7 +15,8 @@ function Panel({ children }) {
           backgroundColor: "white",
           position: "relative",
           overflowX: "auto",
-          maxWidth: `${maxWidth}px`
+          maxWidth: `${maxWidth}px`,
+          minHeight: "80vh",
         }}
       >
         {children}

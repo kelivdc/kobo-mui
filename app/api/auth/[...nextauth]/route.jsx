@@ -20,7 +20,7 @@ export const authOptions = {
                         password: credentials.password
                     }
                 })
-                .then(function (result) {                    
+                .then(function (result) {                 
                     const user = {id: "1", username: credentials.username, jwt: result.data.token}
                     return user
                 })
